@@ -6,6 +6,8 @@ import { RootStackScreenProps } from '../types'
 
 import { Towns } from "../settings"
 
+import { firebaseAuth } from "../firebase/config"
+
 export default function RegisterScreen({ navigation }: RootStackScreenProps<'Register'>) {
   const [username, setUsername] = React.useState("")
   const [password, setPassword] = React.useState("")
@@ -27,6 +29,41 @@ export default function RegisterScreen({ navigation }: RootStackScreenProps<'Reg
           />
       </View>
     );
+  }
+
+  const handleRegister = async () => {
+    firebaseAuth
+      .createUserWithEmailAndPassword(firebaseAuth.getAuth(), `testemail@email.com`, `password123456`)
+      .then((response) => {
+        console.log(response)
+        return response
+      })
+    // try {
+    //   firebase
+    //       .auth()
+    //       .createUserWithEmailAndPassword(email, password)
+    //       .then((response) => {
+    //             const uid = response.user.uid
+    //             const data = {
+    //                 id: uid,
+    //                 email,
+    //                 fullName,
+    //             };
+    //             const usersRef = firebase.firestore().collection('users')
+    //             usersRef
+    //                 .doc(uid)
+    //                 .set(data)
+    //                 .then(() => {
+    //                     navigation.navigate('Home', {user: data})
+    //                 })
+    //                 .catch((error) => {
+    //                     alert(error)
+    //                 });
+    //         })
+    //     })
+    // } catch(error) {
+    //   alert(error)
+    // }
   }
 
   return (
@@ -87,7 +124,7 @@ export default function RegisterScreen({ navigation }: RootStackScreenProps<'Reg
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => console.log("Register")}
+            onPress={() => handleRegister()}
           >
             <Text style={styles.buttonText}>{"Register"}</Text>
           </TouchableOpacity>

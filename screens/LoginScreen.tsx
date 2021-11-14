@@ -1,15 +1,39 @@
 import * as React from 'react';
-import { StyleSheet, KeyboardAvoidingView, TextInput, TouchableOpacity } from 'react-native'
-import { Text,  View } from '../components/Themed'
+import { Text,  View, StyleSheet, KeyboardAvoidingView, TextInput, TouchableOpacity } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { RootStackScreenProps } from '../types'
+
+import { firebaseAuth } from "../firebase/config"
 
 export default function LoginScreen({ navigation }: RootStackScreenProps<'Login'>) {
   const [username, setUsername] = React.useState("")
   const [password, setPassword] = React.useState("")
   const [passwordVisibility, setPasswordVisibility] = React.useState(true)
+  const [isSubmitting, setSubmitting] = React.useState<boolean>(false)
+
 
   const goToRegisterView = () => {
     navigation.navigate("Register")
+  }
+
+  const handleLogin = async () => {
+    const auth = firebaseAuth.getAuth()
+    // setSubmitting(true)
+
+    firebaseAuth.signInWithEmailAndPassword(auth, username, password)
+      .then((loggedInUser) =>{
+        console.log(loggedInUser, `loggedInUser`)
+        AsyncStorage.setItem('@loggedInUser', loggedInUser.user.uid)
+
+        setSubmitting(false)
+        navigation.navigate("Home")
+      }).catch((error) => {
+        setSubmitting(false)
+        console.log(error, `error`)
+      });
+
+  
+
   }
 
   return (
@@ -19,9 +43,10 @@ export default function LoginScreen({ navigation }: RootStackScreenProps<'Login'
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
+            keyboardType='email-address'
             onChangeText={setUsername}
             value={username}
-            placeholder="Username"
+            placeholder="Email"
           />
         </View>
         <View style={styles.inputContainer}>
@@ -37,9 +62,9 @@ export default function LoginScreen({ navigation }: RootStackScreenProps<'Login'
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => console.log("Login")}
+            onPress={() => handleLogin()}
           >
-            <Text style={styles.buttonText}>{"Login"}</Text>
+            <Text style={styles.buttonText}>{isSubmitting ? "Logging in...." : "Login"}</Text>
           </TouchableOpacity>
         </View>
       </View>
