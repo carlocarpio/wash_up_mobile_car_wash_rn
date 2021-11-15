@@ -28,46 +28,57 @@ type BookingType = {
 }
 
 export default function MyBookingScreen({ navigation }: RootTabScreenProps<"Booking">) {
-  const [bookings, setBookings] = React.useState<BookingType[]>([])
-
-  // const bookingsRef = firebaseStore.collection(firebaseStore.db, "bookings")
-  // const q = firebaseStore.query(bookingsRef, firebaseStore.where("userID", "==", firebaseAuth.getAuth().currentUser?.uid))
+  const [bookings, setBookings] = React.useState<any>([])
 
   const q = firebaseStore.query(firebaseStore.collection(firebaseStore.db, "bookings"), firebaseStore.where("userID", "==", firebaseAuth.getAuth().currentUser?.uid))
 
-  const test: BookingType[] = [] 
 
-  const getBookings = async () => {
-    const querySnapshot = await firebaseStore.getDocs(q) 
-    querySnapshot.forEach((doc) => {
-      test.push(doc.data() as BookingType)
-    })
-    
-  }
-
-  firebaseStore.onSnapshot(q, (querySnapshot) => {
-    querySnapshot.forEach((doc) => {
-      return test.push(doc.data() as BookingType);
-    })
-  })
 
   React.useEffect(() => {
-    getBookings()
-  },[])
+    const getBookings = firebaseStore.onSnapshot(q, (querySnapshot) => {
+      const bookingsArray: BookingType[] = [];
+      querySnapshot.forEach((doc) => {
+        bookingsArray.push(doc.data() as BookingType)
+      })
+      // setBookings((previousBookings: any) => [...previousBookings, ...bookingsArray])
+      setBookings(bookingsArray)
+    })
+
+    return () => getBookings()
+  }, [])
+
 
  React.useEffect(() => {
-    // setBookings(test)
-    console.log(test, `test`)
-  },[test])
-  
+    const unsubscribe = firebaseStore.onSnapshot(q, (querySnapshot) => {
+      const bookingFirestore = querySnapshot.docChanges().map(({ doc }) => {
+        const booking = doc.data()
+        return booking
+      })
+
+      // console.log(bookingFirestore, `1111`)
+
+     setBookings((previousBookings: any) => [...previousBookings, bookingFirestore])
+    })
+
+    return () => unsubscribe()
+  },[])
+
   return (
     <ScrollView style={styles.wrapper}>
       <View>
-        {test?.map((booking) => (
-          <View style={{ marginBottom: 10 }}>
-            <BookingCard booking={booking} />
-          </View>
-        ))}
+        {bookings?.map((booking: any, index: number) => {
+          console.log(booking.date, `booking`)
+
+          if (booking.date === undefined) {
+            return
+          }
+
+          return (
+            <View style={{ marginBottom: 10 }}>
+              <BookingCard booking={booking} />
+            </View>
+          )
+        })}
       </View>
     </ScrollView>
   )

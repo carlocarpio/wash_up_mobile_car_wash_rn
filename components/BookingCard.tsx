@@ -14,11 +14,13 @@ interface iBookingCard {
 }
 
 export default function BookingCard({ booking }: iBookingCard) {
+
+
   return (
     <View style={[styles.container]}>
-      <Text style={{ fontSize: 18, fontWeight: "700" }}>{dateFnsFormat(booking.date.toDate(), 'iiii - MMMM dd, yyyy')}</Text>
+      <Text style={{ fontSize: 18, fontWeight: "700" }}>{booking?.date !== undefined ? dateFnsFormat(booking?.date.toDate(), 'iiii - MMMM dd, yyyy') : ""}</Text>
 
-      {booking.cars.map((car: any, index: number) => (
+      {booking?.cars && booking?.cars.map((car: any, index: number) => (
         <View style={styles.carServiceItem} key={Math.random()}>
           <View>
             <Text style={styles.carServiceNumber}>{index + 1}</Text>
